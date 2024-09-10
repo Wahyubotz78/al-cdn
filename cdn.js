@@ -69,11 +69,11 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: err.message });
 });
-
+/*
 // 404 Not Found middleware
 app.use((req, res) => {
   res.status(404).json({ error: 'Page Not Found' });
-});
+});*/
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
