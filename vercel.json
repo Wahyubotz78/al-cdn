@@ -4,7 +4,8 @@
     { "src": "cdn.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/cdn.js" }
+    { "handle": "filesystem" }, // Menyajikan file statis
+    { "src": "/upload", "dest": "/cdn.js" }, // Menangani POST /upload
+    { "src": "/(.*)", "dest": "/cdn.js" } // Fallback untuk permintaan lainnya
   ]
 }
