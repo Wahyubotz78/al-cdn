@@ -4,5 +4,8 @@
     },
     "SAVE20": {
         "discount": 0.5
+    },
+    "ZANSKODE": {
+    "discount": 1500
     }
 }
