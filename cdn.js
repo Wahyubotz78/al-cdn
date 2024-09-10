@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 app.set('json spaces', 2);
 app.use(methodOverride('_method'));
-
+app.use(express.static('cdn'));
 global.baseurl;
 
 // Middleware for base URL
