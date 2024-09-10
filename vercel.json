@@ -5,7 +5,6 @@
   ],
   "routes": [
     { "handle": "filesystem" }, 
-    { "src": "/upload", "dest": "/cdn.js" },
     { "src": "/(.*)", "dest": "/cdn.js" } 
   ]
 }
