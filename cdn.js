@@ -8,17 +8,15 @@ const fs = require("fs")
 const mongoUri = 'mongodb+srv://alanqwerty:qwerty123@cluster0.cjvb1q8.mongodb.net/mydatabase?retryWrites=true&w=majority';
 const dbName = 'tttt';
 const client = new MongoClient(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
-app.use(express.static(path.join(__dirname, 'cdn')));
 async function connectToMongo() {
   await client.connect();
   console.log('Connected to MongoDB');
   return client.db(dbName);
 }
 const storage = multer.memoryStorage(); 
-const upload = multer({ storage });
-app.get("/", (req,res) => {
-  res.status(200).json({status: 200, creator: "alan", msg: "Cdn active"})
-})
+const upload = multer({ storage })
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.post('/upload', upload.single('file'), async (req, res) => {
   const db = await connectToMongo();
   const bucket = new GridFSBucket(db);
@@ -50,6 +48,13 @@ app.get('/files/:fileId', async (req, res) => {
       res.status(500).json({ error: err.message });
     });
 });
+app.get("/upload", (req,res) => {
+  res.status(200).json({status: 200, creator: "alan", msg: "endpoint active please use post method
+                            })
+app.use(express.static(path.join(__dirname, 'cdn')));
+app.get("/", (req,res) => {
+  res.status(200).json({status: 200, creator: "alan", msg: "Cdn active"})
+})
 
 // Endpoint untuk mengunduh file
 app.get('/download/:fileId', async (req, res) => {
