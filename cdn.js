@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const path = require("path")
 const { MongoClient, GridFSBucket, ObjectId } = require('mongodb');
 const app = express();
 const PORT = 3000;
@@ -7,7 +8,7 @@ const fs = require("fs")
 const mongoUri = 'mongodb+srv://alanqwerty:qwerty123@cluster0.cjvb1q8.mongodb.net/mydatabase?retryWrites=true&w=majority';
 const dbName = 'tttt';
 const client = new MongoClient(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
-app.use(express.static('cdn'));
+app.use(express.static(path.join(__dirname, 'cdn')));
 async function connectToMongo() {
   await client.connect();
   console.log('Connected to MongoDB');
