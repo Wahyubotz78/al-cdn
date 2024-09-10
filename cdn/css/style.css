@@ -1,0 +1,90 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Roboto', sans-serif;
+}
+
+.navbar {
+    background-color: #343a40;
+}
+
+.navbar-brand {
+    color: #fff;
+    font-weight: bold;
+}
+
+.navbar-brand span {
+    color: #17a2b8;
+}
+
+.search-form {
+    margin-top: 10px;
+}
+
+.search-form input {
+    border-radius: 8px;
+}
+
+.category-menu {
+    margin-top: 20px;
+}
+
+.category-menu button {
+    margin: 5px;
+    border-radius: 30px;
+    font-weight: bold;
+}
+
+.btn-outline-primary {
+    border-color: #17a2b8;
+    color: #17a2b8;
+}
+
+.btn-outline-primary:hover {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.product-category {
+    margin-top: 50px;
+}
+#product-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.footer {
+    background-color: #343a40;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+    margin-top: 50px;
+}
+
+.footer p {
+    margin: 0;
+}
+
+.product-card {
+    display: flex;
+    position: relative;
+    flex-basis: 20%;
+    width: 100%;
+    margin: 5px 0; 
+    padding: 5px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    text-align: center;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+@media (max-width: 767px) {
+    .product-card {
+        flex-basis: 10%;
+        max-width: 100%;
+    }
+}
