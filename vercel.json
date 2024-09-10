@@ -4,6 +4,7 @@
     { "src": "cdn.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/cdn/$1" }
+    { "src": "/(.*)", "dest": "/cdn/$1" },
+    { "src": "/(.*)", "dest": "/cdn.js" }
   ]
 }
