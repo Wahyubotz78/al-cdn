@@ -24,18 +24,60 @@ app.use((req, res, next) => {
 // MongoDB connection setup
 const mongoUri = 'mongodb+srv://alanqwerty:qwerty123@cluster0.cjvb1q8.mongodb.net/mydatabase?retryWrites=true&w=majority';
 const dbName = 'filedb';
-let bucket;
-MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(client => {
-    const db = client.db(dbName);
-    bucket = new GridFSBucket(db, { bucketName: 'files' });
-    console.log('Connected to MongoDB');
-  })
-  .catch(err => console.error(err));
+const client = new MongoClient(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-// Configure Multer memory storage (no file saved on disk)
-const storage = multer.memoryStorage();
+async function connectToMongo() {
+  await client.connect();
+  console.log('Connected to MongoDB');
+  return client.db(dbName);
+}
+
+// Setup multer
+const storage = multer.memoryStorage();  // Use memory storage to keep the file in memory
 const upload = multer({ storage });
+
+// Endpoint untuk upload file
+app.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    const db = await connectToMongo();
+    const bucket = new GridFSBucket(db); // Inisialisasi GridFSBucket setelah koneksi ke database
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const uploadStream = bucket.openUploadStream(req.file.originalname);
+    uploadStream.end(req.file.buffer);
+
+    uploadStream.on('finish', () => {
+      res.json({ fileId: uploadStream.id, fileName: req.file.originalname });
+    });
+
+    uploadStream.on('error', (err) => {
+      res.status(500).json({ error: err.message });
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint untuk menampilkan file
+app.get('/files/:fileId', async (req, res) => {
+  try {
+    const db = await connectToMongo();
+    const bucket = new GridFSBucket(db);
+
+    const fileId = new ObjectId(req.params.fileId);
+
+    bucket.openDownloadStream(fileId)
+      .pipe(res)
+      .on('error', (err) => {
+        res.status(500).json({ error: err.message });
+      });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 app.get("/", (req, res) => {
   res.status(200).json({ status: 200, creator: "alan", msg: "Cdn active" });
 // res.sendFile(fs.realpathSync("./public/index.html"))
@@ -45,76 +87,8 @@ app.get("/upload", (req, res) => {
   res.status(200).json({ status: 200, creator: "alan", msg: "Endpoint active, use POST method" });
 });
 
-// Route for uploading files
-app.post('/upload', upload.single('file'), async (req, res) => {
-  try {
-    const { originalname, mimetype, buffer } = req.file;
 
-    // Store file in MongoDB GridFS
-    const uploadStream = bucket.openUploadStream(originalname, { contentType: mimetype });
-    uploadStream.end(buffer);
 
-    uploadStream.on('finish', () => {
-      res.json({ 
-        Url: global.baseurl + "files/" + uploadStream.id.toString(), 
-        fileName: originalname,
-        fileId: uploadStream.id.toString() 
-      });
-    });
-
-    uploadStream.on('error', err => {
-      res.status(500).json({ error: err.message });
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Route to retrieve files by ID
-app.get('/files/:id', async (req, res) => {
-  try {
-    const fileId = req.params.id;
-
-    // Fetch file from MongoDB GridFS
-    const downloadStream = bucket.openDownloadStream(new ObjectId(fileId));
-
-    downloadStream.on('data', chunk => res.write(chunk));
-    downloadStream.on('end', () => res.end());
-    downloadStream.on('error', err => {
-      res.status(404).json({ error: 'File not found' });
-    });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Route to download files by ID
-app.get('/download/:id', async (req, res) => {
-  try {
-    const fileId = req.params.id;
-
-    // Fetch file from MongoDB GridFS
-    const downloadStream = bucket.openDownloadStream(new MongoClient.ObjectId(fileId));
-
-    downloadStream.on('data', chunk => res.write(chunk));
-    downloadStream.on('end', () => res.end());
-    downloadStream.on('error', err => {
-      res.status(404).json({ error: 'File not found' });
-    });
-
-    downloadStream.pipe(res);
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Route for home page
-app.get("/", async (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
 
 // 404 middleware
 app.use((req, res) => {
