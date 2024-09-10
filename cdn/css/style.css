@@ -15,21 +15,7 @@ body {
 .navbar-brand span {
     color: #17a2b8;
 }
-        .carousel-inner {
-            max-width: 100%; /* Sesuaikan lebar carousel */
-            margin: 0 auto; /* Posisikan di tengah */
-        }
-        .carousel-item img {
-            width: 100%; /* Gambar menyesuaikan dengan ukuran carousel */
-            max-height: 100%; /* Batasi tinggi gambar agar tidak terlalu besar */
-            object-fit: cover; 
-            border-radius: 15px; /* Sudut melengkung */
-        }
 
-        /* Tambahan padding di sekeliling carousel untuk memperbaiki tampilan */
-        .carousel-item {
-            padding: 10px;
-        }
 .search-form {
     margin-top: 10px;
 }
@@ -47,7 +33,19 @@ body {
     border-radius: 30px;
     font-weight: bold;
 }
-
+.carousel-inner {
+    max-width: 100%; 
+    margin: 0 auto;
+}
+.carousel-item img {
+    width: 100%; 
+    max-height: 100%; 
+    object-fit: cover; 
+    border-radius: 15px; 
+}
+.carousel-item {
+    padding: 10px;
+}
 .btn-outline-primary {
     border-color: #17a2b8;
     color: #17a2b8;
