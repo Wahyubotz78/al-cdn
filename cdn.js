@@ -49,7 +49,7 @@ app.get('/files/:fileId', async (req, res) => {
     });
 });
 app.get("/upload", (req,res) => {
-  res.status(200).json({status: 200, creator: "alan", msg: "endpoint active please use post method
+  res.status(200).json({status: 200, creator: "alan", msg: "endpoint active please use post method"})
                             })
 app.use(express.static(path.join(__dirname, 'cdn')));
 app.get("/", (req,res) => {
