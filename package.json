@@ -3,9 +3,11 @@
 "start": "node cdn.js"
 },
   "dependencies": {
+    "cors": "latest",
     "express": "latest",
     "path": "latest",
     "multer": "latest",
-    "mongodb": "latest"
+    "mongodb": "latest",
+    "method-override":"latest"
   }
 }
