@@ -11,7 +11,7 @@
     }
   ],
 "functions": {
-    "/cdn.js": {
+    "cdn.js": {
       "maxDuration": 60
     }
   },
