@@ -33,50 +33,99 @@ async function connectToMongo() {
 }
 
 // Setup multer
-const storage = multer.memoryStorage();  // Use memory storage to keep the file in memory
-const upload = multer({ storage });
+const upload = multer(); // In-memory storage for chunked upload
+const uploadStreams = new Map(); // To store upload streams for each file
 
-// Endpoint untuk upload file
-app.post('/upload', upload.single('file'), async (req, res) => {
-  try {
-    const db = await connectToMongo();
-    const bucket = new GridFSBucket(db); // Inisialisasi GridFSBucket setelah koneksi ke database
+app.post('/upload', upload.single('chunk'), async (req, res) => {
+    try {
+        const { fileName, chunkIndex, totalChunks } = req.body;
+        const db = await connectToMongo();
+        const bucket = new GridFSBucket(db);
 
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
+        // Parse chunk index and total chunks
+        const currentChunkIndex = parseInt(chunkIndex, 10);
+        const total = parseInt(totalChunks, 10);
 
-    const uploadStream = bucket.openUploadStream(req.file.originalname);
-    uploadStream.end(req.file.buffer);
+        // Check if this is the first chunk
+        if (currentChunkIndex === 0) {
+            const uploadStream = bucket.openUploadStream(fileName);
+            uploadStreams.set(fileName, uploadStream); // Save the stream for future chunks
+        }
 
-    uploadStream.on('finish', () => {
-      res.json({ fileId: uploadStream.id, fileName: req.file.originalname });
-    });
+        // Get the upload stream for the file
+        const uploadStream = uploadStreams.get(fileName);
+        if (!uploadStream) {
+            return res.status(500).json({ error: 'Upload stream not found' });
+        }
 
-    uploadStream.on('error', (err) => {
-      res.status(500).json({ error: err.message });
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+        // Write the chunk data to the upload stream
+        uploadStream.write(req.file.buffer);
 
-// Endpoint untuk menampilkan file
-app.get('/files/:fileId', async (req, res) => {
-  try {
-    const db = await connectToMongo();
-    const bucket = new GridFSBucket(db);
+        // If it's the last chunk, end the stream and return success
+        if (currentChunkIndex === total - 1) {
+            uploadStream.end(); // Close the stream
+            uploadStream.on('finish', () => {
+                const fileId = uploadStream.id;
+                uploadStreams.delete(fileName); // Clean up the stream reference
+                res.json({ message: 'File upload complete', fileId, filename: fileName });
+            });
+        } else {
+            res.json({ message: `Chunk ${chunkIndex} uploaded successfully` });
+        }
 
-    const fileId = new ObjectId(req.params.fileId);
-
-    bucket.openDownloadStream(fileId)
-      .pipe(res)
-      .on('error', (err) => {
+    } catch (err) {
         res.status(500).json({ error: err.message });
-      });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    }
+});
+app.get('/files/:fileId', async (req, res) => {
+    try {
+        const db = await connectToMongo();
+        const bucket = new GridFSBucket(db);
+        const filename = req.query.filename
+        const fileId = new ObjectId(req.params.fileId);
+
+        // Ambil informasi file dari MongoDB
+        const file = await bucket.find({ _id: fileId }).toArray();
+        if (!file || file.length === 0) {
+            return res.status(404).json({ error: 'File not found' });
+        }
+
+        const fileLength = file[0].length; // Ukuran total file
+        const range = req.headers.range;
+
+        if (!range) {
+            // Jika tidak ada Range, kirimkan seluruh file
+            res.set('Content-Type', file[0].contentType);
+            res.set('Content-Length', fileLength);
+            res.set('Accept-Ranges', 'bytes');
+              res.set('Content-Disposition', `attachment; filename="${filename}"`);
+            bucket.openDownloadStream(fileId).pipe(res);
+        } else {
+            // Jika ada Range header, lakukan streaming sebagian file
+            const parts = range.replace(/bytes=/, "").split("-");
+            const start = parseInt(parts[0], 10);
+            const end = parts[1] ? parseInt(parts[1], 10) : fileLength - 1;
+
+            if (start >= fileLength || end >= fileLength) {
+                res.status(416).json({ error: 'Requested range not satisfiable' });
+                return;
+            }
+
+            const chunkSize = (end - start) + 1;
+            res.status(206);
+            res.set({
+                'Content-Range': `bytes ${start}-${end}/${fileLength}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunkSize,
+                'Content-Type': file[0].contentType,
+            });
+
+            // Stream sebagian file yang diminta
+            bucket.openDownloadStream(fileId, { start, end: end + 1 }).pipe(res);
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 app.get("/", (req, res) => {
   res.status(200).json({ status: 200, creator: "alan", msg: "Cdn active" });
