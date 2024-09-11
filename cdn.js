@@ -81,7 +81,7 @@ app.get('/files/:fileId', async (req, res) => {
     try {
         const db = await connectToMongo();
         const bucket = new GridFSBucket(db);
-        const filename = req.query.filename
+        const filename = req.query.filename;
         const fileId = new ObjectId(req.params.fileId);
 
         // Ambil informasi file dari MongoDB
@@ -98,7 +98,7 @@ app.get('/files/:fileId', async (req, res) => {
             res.set('Content-Type', file[0].contentType);
             res.set('Content-Length', fileLength);
             res.set('Accept-Ranges', 'bytes');
-              res.set('Content-Disposition', `attachment; filename="${filename}"`);
+            res.set('Content-Disposition', `inline; filename="${filename}"`); // Ubah menjadi inline
             bucket.openDownloadStream(fileId).pipe(res);
         } else {
             // Jika ada Range header, lakukan streaming sebagian file
@@ -118,6 +118,7 @@ app.get('/files/:fileId', async (req, res) => {
                 'Accept-Ranges': 'bytes',
                 'Content-Length': chunkSize,
                 'Content-Type': file[0].contentType,
+                'Content-Disposition': `inline; filename="${filename}"`, // Ubah menjadi inline
             });
 
             // Stream sebagian file yang diminta
@@ -127,6 +128,7 @@ app.get('/files/:fileId', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
 app.get("/", (req, res) => {
   res.status(200).json({ status: 200, creator: "alan", msg: "Cdn active" });
 // res.sendFile(fs.realpathSync("./public/index.html"))
