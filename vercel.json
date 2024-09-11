@@ -15,14 +15,14 @@
       "src": "/(.*)",
       "dest": "/cdn.js",
       "headers": {
-        "x-vercel-max-duration": "30"
+        "x-vercel-max-duration": "60"
       }
     },
     {
       "src": "/(.+)",
       "dest": "cdn/$1",
       "headers": {
-        "x-vercel-max-duration": "30"
+        "x-vercel-max-duration": "60"
       }
     }
   ]
