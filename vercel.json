@@ -20,10 +20,8 @@
         "dest": "cdn/$1"
     }
   ],
-  {
   "functions": {
     "cdn.js": {
       "maxDuration": 30
     }
-  }
 }
