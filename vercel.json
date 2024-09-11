@@ -6,7 +6,7 @@
       "use": "@vercel/node" 
     },
     {
-        "src": "public/**",
+        "src": "cdn/**",
         "use": "@vercel/static"
     }
   ],
@@ -19,11 +19,5 @@
         "src": "/(.+)",
         "dest": "cdn/$1"
     }
-  ],
-  "functions": {
-    "cdn.js": {
-      "maxDuration": 30,
-      "memory": 1024
-    }
-  }
+  ]
 }
