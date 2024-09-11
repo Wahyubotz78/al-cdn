@@ -6,23 +6,24 @@
       "use": "@vercel/node" 
     },
     {
-        "src": "cdn/**",
-        "use": "@vercel/static"
+      "src": "cdn/**",
+      "use": "@vercel/static"
     }
   ],
-"functions": {
-    "cdn.js": {
-      "maxDuration": 60
-    }
-  },
   "routes": [ 
     { 
-        "src": "/(.*)",
-        "dest": "/cdn.js"
+      "src": "/(.*)",
+      "dest": "/cdn.js",
+      "headers": {
+        "x-vercel-max-duration": "30"
+      }
     },
     {
-        "src": "/(.+)",
-        "dest": "cdn/$1"
+      "src": "/(.+)",
+      "dest": "cdn/$1",
+      "headers": {
+        "x-vercel-max-duration": "30"
+      }
     }
   ]
 }
