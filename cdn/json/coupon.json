@@ -1,8 +1,6 @@
 {
-    "DISCOUNT10": {
+    "ZansPiw": {
+        "reqprice": 5000,
         "discount": 10
-    },
-    "SAVE20": {
-        "discount": 0.5
     }
 }
