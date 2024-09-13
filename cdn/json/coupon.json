@@ -1,6 +1,6 @@
 {
-    "ZansPiw": {
-        "reqprice": 5000,
-        "discount": 1500
+    "dihapus": {
+        "reqprice": 0,
+        "discount": 0
     }
 }
